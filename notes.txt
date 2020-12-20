@@ -1,0 +1,145 @@
+1: -5V
+2: Pin 19 (A10) on U13 (EPROM) 
+3: +12V
+4: Pin 18 (*CS) on U13 (EPROM)
+5: *WR from Z80
+6: Pin J4
+7: A10 from CPU
+
+	U38 pin 1 to U46 pin 18
+
+	U13 appears to be boot ROM
+
+	U13 pin 20 (*OE) to U27 pin 8 (quad input NAND)
+
+	U27 pin 10 (input B2) to jumper R 3+4, currently MREQ
+		-Jumper R 1+2 to U37 pin 6 (inverter output, input on 5)
+		- bodge wire to S-100 pin 65 (NDEF on IEEE-696)
+			- U37 pin 5 to U38 pin 8 (74LS02 NOR input)
+				- also U28 pins 10 and 12 (74LS00 NAND inputs)
+				- driven by Z80 pin 19 (*MREQ)
+
+	U27 pin 9 to U23 pin 6 (74LS04 output), currently *A11
+		- U23 pin 5 to jumper G 1-4, currently jumpered to F 2
+			- Jumper F 2 to jumper J 4
+			- Jumper J 4 to Z80 pin 1 (A11)
+
+	U27 pin 12 to U26 pin 11 (74LS175 latch *Q2 output)
+		- clocked with U18 pin 23 (*ECS on PIC)
+		- originates from U25 pin 9 (output #4 of 4, second channel)
+		- data from D6
+
+	U27 pin 13 to U28 pin 3 (74LS00 NAND output) -- this looks like address decode
+		- U28 pin 1 to U21 pin 8 (74LS30 8-input NAND output)
+			- U21 pin 1 to jumper H 5+6, jumpered to J 6
+				- J 6 to jumper F 3
+				- F 3 to Z80 pin 2 (A12)
+			- U21 pin 2 to Z80 pin 5 (A15)
+			- U21 pin 3 to jumper H 3+4, jumpered to J 3
+				- J 3 to +5V
+			- U21 pin 4 to U21 pin 3
+			- U21 pin 5 to Z80 pin 4 (A14)
+			- U21 pin 6 to Z80 pin 3 (A13)
+			- U21 pin 11 to jumper H 1+2, jumpered to J2
+				- J 2 to +5V
+			- U21 pin 12 U21 pin 11
+
+			So, U21 pin 8 goes low when A12, A13, A14, A15 are HIGH
+
+		- U28 pin 2 to U26 pin 15 (74LS175 latch Q3)
+			- Q3 is data bit D7
+
+		This pin is high when (A12 && A13 && A14 && A15) || ROM_EVERYWHERE
+
+	CONDITIONS FOR ROM *OE:
+		- MREQ
+		- A11 is LOW
+		- D6 == 0 on U26 latch (looks like ROM ENABLE, enabled on reset)
+		- D7 == 0 on U26 latch (looks like ROM EVERYWHERE, enabled on reset) or A13, A14, A15 HIGH 
+
+	U26 latch cleared on reset
+
+	Looks like the ROM is at 0x0000 on reset, then once ROM EVERYWHERE is switched out, the ROM will live at 0xF000 - 0xF800
+
+	U5 is controlled by U27 pin 6
+		- U27 pin 1 to U26 pin 6 (*Q1 latch output, data bit D5, HIGH on reset)
+		- U27 pin 2 to U27 pin 13 (high nybble address decode/ROM EVERYWHERE)
+		- U27 pin 5 to A11
+		- U27 pin 4 to jumper R 1+2 (MREQ)
+
+	So, with the jumpering we had before cleaning this board up, ROM will come up with U13 at 0x0000 and U5 at 0x0800,
+	configured for 2716 type EPROMs. They can be moved up to 0xF000 and 0xF800, respectively, or disabled completely.
+
+
+U1	1488
+U2	1489
+U3	1488
+U4	1489
+U5	RAM/ROM
+U6	74HCU04
+U7	74LS640
+U8	74LS640
+U9	74LS367
+U10	7406
+
+U11	8251A USART
+U12	8251A USART
+U13	RAM/ROM
+U14	8253 TIMER
+U15	8255 PPI
+U16	74LS04
+U17	7406
+U18	8214 INTERRUPT CONTROLLER
+U19 74LS374
+
+U20 74LS393
+U21 74LS30
+U22 74LS74
+U23 74LS04
+U24 74LS10
+U25 74LS139
+U26 74LS175
+U27 74LS20
+U28 74LS00
+U29 SPARE
+
+U30 74LS74
+U31 74LS20
+U32 74LS260
+U33 74LS74
+U34 74LS367
+U35 Z80 CPU
+U36 74LS244
+U37 74LS04
+U38 74LS02
+U39 7417
+
+U40 74LS04
+U41 74LS367
+U42 74LS373
+U43 74LS373
+U44 74LS244
+U45 74LS02
+U46 74LS373
+
+*** JUMPERS ***
+
+DD to EE: 2,3,4,16
+
+AA: 1-2
+BB: 1-2
+
+F to G: 2
+
+H to J: 2,3,6
+
+See picture for big jumper block.
+
+
+*** Serial Ports ***
+
+U11 USART gets clock from 8253 OUT0 (pin 10)
+*CS fed from U25 pin 12 (1-of-4 decoder)
+
+U12 USART gets clock from 8253 OUT1 (pin 13)
+*CS fed from U25 pin 11 (1-of-4 decoder)

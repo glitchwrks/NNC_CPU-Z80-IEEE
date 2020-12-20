@@ -1,0 +1,16 @@
+                      NOTE
+
+Several files in NNC-CCS.ZIP appear to be truncated.  They are:
+
+      DIOS.ASM
+      EKMSGS.OVR
+      FDISK.DOC
+      NNC-CPU.DOC
+      TX.ASM
+
+Other .COM files may be also.  The .HEX files appear OK.
+
+The files were read using UniForm 12-V (Zenith Z-100 8") which may not
+be quite right.
+
+
